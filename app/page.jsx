@@ -6,7 +6,7 @@ import { useState, useCallback, Fragment } from "react";
    Desktop-First Clinical Decision Support
    ============================================================ */
 
-// ── STRAIN DATABASE (24 Catalyst + 11 Verified = 35 total) ──
+// ── STRAIN DATABASE (35 existing + 10 new = 45 total) ──
 const strainDB = [
   // VERIFIED — status:"tried" means confirmed by patient outcome data
   { name:"IndiMed Tempo 26 Electric Honeydew", brand:"IndiMed", cultivar:"Electric Honeydew", thc:26, cbd:0, category:"Day / Functional", status:"tried", species:"Sativa dominant", terpenes:{limonene:0.8,caryophyllene:0.5,pinene:0.4,myrcene:0.2,linalool:0.1}, totalTerpenes:2.0, price:null, rrp:null, sizes:[], notes:"Benchmark intelligent sativa hybrid. Limonene-led with strong caryophyllene anchor." },
@@ -46,6 +46,18 @@ const strainDB = [
   { name:"Aura Purple Raine", brand:"AURA Therapeutics", cultivar:"Purple Raine", thc:18, cbd:0, category:"Deep Think / Creative", status:"predicted", species:"Indica dominant", terpenes:{limonene:0.85,caryophyllene:0.58,farnesene:0.43,linalool:0.37,myrcene:0.22,humulene:0.13,betaPinene:0.11,fenchol:0.09,alphaPinene:0.08,terpineol:0.07,nerolidol:0.05,bisabolol:0.05,ocimene:0.03,betaCitronellol:0.02,camphene:0.02,terpinolene:0.01,fenchone:0.01,borneol:0.01,caryophylleneOxide:0.01,geraniol:0.01}, totalTerpenes:3.16, price:5.93, rrp:178, sizes:["30g","15g"], notes:"HIGHEST TOTAL TERPENES (3.16%). Near-perfect architecture. Exceptional value." },
   { name:"MCA NOVA T28", brand:"MCA", cultivar:"Original Blitz", thc:28, cbd:0, category:"Day / Functional", status:"predicted", species:"Indica dominant", terpenes:{limonene:0.55,caryophyllene:0.47,myrcene:0.24,humulene:0.24,guaiol:0.12,bisabolol:0.09,betaPinene:0.09,alphaPinene:0.07,linalool:0.05}, totalTerpenes:1.92, price:13.90, rrp:139, sizes:["10g"], notes:"Classic functional architecture at 28% THC." },
   { name:"THC 30 Sora", brand:"Althea", cultivar:"Sora", thc:30, cbd:0, category:"Deep Think / Creative", status:"predicted", species:"Balanced Hybrid", terpenes:{caryophyllene:0.84,myrcene:0.67,limonene:0.37,humulene:0.25,linalool:0.14,bisabolol:0.12,betaPinene:0.07,terpineol:0.05,alphaPinene:0.04,caryophylleneOxide:0.03,nerolidol:0.02,ocimene:0.02,betaCitronellol:0.01,alphaTerpinene:0.01,camphene:0.01,geraniol:0.01,terpinolene:0.01,cymene:0.01,delta3Carene:0.01,eucalyptol:0.01,guaiol:0.01,isopulegol:0.01,gammaTerpinene:0.01,terpinen4ol:0.01,geranylAcetate:0.01}, totalTerpenes:2.75, price:10.90, rrp:109, sizes:["10g","30g"], notes:"Caryophyllene-dominant at 30% THC. Deep body-think territory." },
+
+  // NEW — BATCH 28 March 2026
+  { name:"Australian Natural Mariposa", brand:"ANTG", cultivar:null, thc:16, cbd:0, category:"Day / Functional", status:"predicted", species:"Balanced Hybrid", terpenes:{limonene:0.17,caryophyllene:0.17,selinaDiene3711:0.15,selinaDiene41511:0.11,humulene:0.08,myrcene:0.07,betaPinene:0.07,alphaPinene:0.04,germacreneB:0.03}, totalTerpenes:0.89, price:12.90, rrp:129, sizes:["10g"], notes:"Unusual terpene profile dominated by sesquiterpenes — selinaDiene3711 (0.15%) and selinaDiene41511 (0.11%). Limonene and caryophyllene tied at lead (0.17% each). Moderate total terpenes (0.89%). Balanced hybrid. Day / Functional predicted." },
+  { name:"Aura Therapeutics Apples & Bananas", brand:"AURA Therapeutics", cultivar:"Apples and Bananas", thc:25, cbd:2, category:"Sleep / KO", status:"predicted", species:"Sativa dominant", terpenes:{myrcene:2.12,ocimene:0.63,alphaPinene:0.53,caryophyllene:0.30,linalool:0.13,betaPinene:0.13,humulene:0.11,limonene:0.08,selinaDiene3711:0.07,alphaBisabolol:0.04,transNerolidol:0.02,betaCitronellol:0.02,farnesene:0.01,camphene:0.01,terpineol:0.01,fenchyl:0.01}, totalTerpenes:4.22, price:14.90, rrp:149, sizes:["10g","20g"], notes:"Myrcene-dominant at 2.12%. Total terpenes 4.22% — highest in the database. Ocimene prominent (0.63%). Despite sativa classification, myrcene dominance strongly predicts sedative effect. Sleep / KO." },
+  { name:"Cannatrek T22 Jasmin", brand:"Cannatrek", cultivar:"Night Queen", thc:22, cbd:0, category:"Sleep / KO", status:"predicted", species:"Indica", terpenes:{caryophyllene:0.23,myrcene:0.15,humulene:0.10,limonene:0.08,linalool:0.04}, totalTerpenes:0.60, price:13.50, rrp:135, sizes:["10g"], notes:"Low total terpenes (0.60%). Caryophyllene-led with myrcene support. Patient data confirms strong night-use: 92% night, 0% day. Cultivar name Night Queen consistent with sleep profile. Sleep / KO." },
+  { name:"Libra 7:7", brand:"Kind Medical", cultivar:"Pennywise", thc:7, cbd:7, category:"CBD Balanced", status:"predicted", species:"Indica dominant", terpenes:{myrcene:0.24,guaiol:0.14,terpinolene:0.14,alphaPinene:0.12,transCaryophyllene:0.11,betaPinene:0.05,humulene:0.04,farnesene:0.03,linalool:0.03,limonene:0.02,terpineol:0.01,transNerolidol:0.01,alphaPhellandrene:0.01,caryophylleneOxide:0.01,delta3Carene:0.01,terpinene:0.01}, totalTerpenes:0.98, price:12.00, rrp:120, sizes:["10g"], notes:"Balanced 7:7 THC:CBD. Three-way lead: myrcene (0.24%), guaiol (0.14%), terpinolene (0.14%). Terpinolene present at meaningful level — CBD content partially offsets anxiety risk in sensitive patients. CBD Balanced." },
+  { name:"West Coast Palms Hawaiian Rain", brand:"West Coast Palms", cultivar:"Hawaiian Rain", thc:26, cbd:0, category:"Day / Functional", status:"predicted", species:"Indica dominant", terpenes:{limonene:0.54,caryophyllene:0.36,myrcene:0.32,linalool:0.23,selinaDiene41511:0.20,germacreneB:0.20,gammaElemene:0.17,transBergamotene:0.15,betaPinene:0.12,fenchol:0.10,humulene:0.09,farnesene:0.09,alphaPinene:0.08,hexylHexanoate:0.06,terpineol:0.05,eBetaOcimene:0.05,fenchyl:0.05,gammaSelinene:0.04,betaSelinene:0.02,betaEudesmol:0.02,borneol:0.02,transNerolidol:0.02,camphene:0.02,alphaSelinene:0.02,fenchone:0.01,camphor:0.01,caryophylleneOxide:0.01,gammaEudesmol:0.01,cedrene:0.01,terpinolene:0.01,bulnesol:0.01,zBetaOcimene:0.01,alphaBisabolol:0.01}, totalTerpenes:3.15, price:15.00, rrp:150, sizes:["10g"], notes:"Most complex terpene profile in the database — 30+ terpenes. Limonene-led (0.54%) with strong caryophyllene (0.36%) and myrcene (0.32%). Day / Functional despite indica species. Rich sesquiterpene content throughout. Terpinolene at trace (0.01%) only." },
+  { name:"Australian Natural Eve CBD16", brand:"ANTG", cultivar:null, thc:1, cbd:16, category:"CBD Dominant", status:"predicted", species:"Indica dominant", terpenes:{myrcene:0.33,caryophyllene:0.17,terpinolene:0.14,limonene:0.09,betaPinene:0.09,delta3Carene:0.05,alphaPinene:0.05,linalool:0.04,alphaTerpinene:0.02}, totalTerpenes:0.98, price:17.90, rrp:179, sizes:["10g"], notes:"CBD dominant (<1% THC, 16% CBD). Myrcene-led (0.33%) with notable terpinolene (0.14%) — CBD content likely moderates terpinolene anxiety risk. Most expensive per gram in this batch at $17.90/g. Patient data: 0% day, 33% night, 66% both." },
+  { name:"Thea 25:1", brand:"Kind Medical", cultivar:"Berry Cream Puff", thc:25, cbd:1, category:"Deep Think / Creative", status:"predicted", species:"Sativa dominant", terpenes:{transCaryophyllene:0.85,limonene:0.44,farnesene:0.41,humulene:0.18,alphaBisabolol:0.14,myrcene:0.14,guaiol:0.12,linalool:0.10,betaPinene:0.07,fenchol:0.06,alphaPinene:0.05,terpineol:0.05,camphene:0.02,caryophylleneOxide:0.01,ocimene:0.01,terpinolene:0.01,borneol:0.01}, totalTerpenes:2.67, price:12.00, rrp:120, sizes:["10g"], notes:"Caryophyllene-led (0.85%) with strong farnesene (0.41%) and limonene (0.44%). Classic Deep Think / Creative architecture. Total terpenes 2.67%. Sativa dominant. Terpinolene at trace (0.01%) — no concern." },
+  { name:"Gas Cake", brand:"Mediquest", cultivar:"Gas Cake", thc:31, cbd:0, category:"Sleep / KO", status:"predicted", species:"Indica dominant", terpenes:{myrcene:1.98,caryophyllene:0.27,limonene:0.25,linalool:0.19,selinaDiene41511:0.19,selinaDiene3711:0.17,germacreneB:0.15,transBergamotene:0.13,cisNerolidol:0.08,eBetaOcimene:0.06,betaPinene:0.06,farnesene:0.04,alphaBisabolol:0.03,alphaPinene:0.02,terpineol:0.02,fenchyl:0.02,gammaEudesmol:0.02,transNerolidol:0.01,valencene:0.01,camphene:0.01}, totalTerpenes:3.67, price:16.50, rrp:165, sizes:["10g"], notes:"Myrcene-dominant at 1.98%. THC 31% — joint highest in database. Total terpenes 3.67% — second highest overall. Heavy sedative architecture. Sleep / KO." },
+  { name:"Alma Cannabis Grape Galena", brand:"Alma Cannabis", cultivar:"Grape Galena", thc:25, cbd:0, category:"Deep Think / Creative", status:"predicted", species:"Indica", terpenes:{limonene:0.88,caryophyllene:0.70,myrcene:0.49,linalool:0.26,farnesene:0.21,selinaDiene3711:0.20,humulene:0.20,germacreneB:0.15,selinaDiene41511:0.14,betaPinene:0.14,alphaBisabolol:0.11}, totalTerpenes:3.48, price:14.90, rrp:149, sizes:["10g"], notes:"Limonene-led (0.88%) with strong caryophyllene (0.70%) and farnesene (0.21%). Classic Deep Think / Creative architecture despite indica classification. High total terpenes (3.48%)." },
+  { name:"Chemovar Daily Grape", brand:"Chemovar", cultivar:"Daily Grape", thc:28, cbd:0, cbg:2, category:"Day / Functional", status:"predicted", species:"Indica dominant", terpenes:{limonene:0.86,farnesene:0.48,transCaryophyllene:0.40,linalool:0.20,alphaBisabolol:0.12,guaiol:0.11,terpineol:0.10,humulene:0.10,betaPinene:0.08,alphaPinene:0.08,fenchyl:0.08,fenchol:0.06,caryophylleneOxide:0.05,sabinene:0.05,fenchone:0.05,gammaTerpinene:0.05,myrcene:0.05,camphene:0.04,borneol:0.01,terpinolene:0.01}, totalTerpenes:2.98, price:12.80, rrp:128, sizes:["10g"], notes:"Limonene-led (0.86%) with strong farnesene (0.48%) and caryophyllene (0.40%). Day / Functional. First database entry with CBG field (cbg: 2). Total terpenes 2.98%. Good price point at $12.80/g. Terpinolene at trace (0.01%) — no concern." },
 ];
 
 // ── OPTION SETS WITH COMMON BADGES ──
@@ -89,9 +101,9 @@ function scoreStrain(strain, answers) {
   let score = 0;
   const reasons = [];
   const t = strain.terpenes || {};
-  const lim = t.limonene || 0, car = t.caryophyllene || 0, myr = t.myrcene || 0;
+  const lim = t.limonene || 0, car = (t.caryophyllene || 0) + (t.transCaryophyllene || 0), myr = t.myrcene || 0;
   const lin = t.linalool || 0, pin = (t.pinene || 0) + (t.alphaPinene || 0) + (t.betaPinene || 0);
-  const far = t.farnesene || 0, terp = t.terpinolene || 0, bis = t.bisabolol || 0;
+  const far = t.farnesene || 0, terp = t.terpinolene || 0, bis = (t.bisabolol || 0) + (t.alphaBisabolol || 0);
 
   // Goal alignment
   if (answers.goal === "functional") {
@@ -160,7 +172,7 @@ function scoreStrain(strain, answers) {
     else { score -= 15; reasons.push("⚠ THC below very-high target (-15)"); }
   }
 
-  // Experience level — "some" now has logic
+  // Experience level
   if (answers.experience === "naive") {
     if (thc > 25) { score -= 20; reasons.push("⚠ THC too high for cannabis-naive patient (-20)"); }
     if (strain.cbd > 0) { score += 15; reasons.push("CBD present — safer for naive patient (+15)"); }
@@ -179,10 +191,10 @@ function scoreStrain(strain, answers) {
   else if (strain.totalTerpenes >= 2.0) { score += 20; reasons.push(`Good terpene density (${strain.totalTerpenes.toFixed(2)}%) (+20)`); }
   else if (strain.totalTerpenes >= 1.5) { score += 10; reasons.push(`Moderate terpene density (${strain.totalTerpenes.toFixed(2)}%) (+10)`); }
 
-  // Verified bonus — increased to +12
+  // Verified bonus
   if (strain.status === "tried") { score += 12; reasons.push("Clinically verified product (+12)"); }
 
-  // Low terpene expression penalty (data-driven, replaces old Avoid/Caution categories)
+  // Low terpene expression penalty
   if (strain.totalTerpenes < 0.5) {
     score -= 30;
     reasons.push("⚠ Very low terpene expression (" + strain.totalTerpenes.toFixed(2) + "%) — limited modulation of THC effects (-30)");
@@ -206,7 +218,25 @@ function getTopTerpenes(terpenes, n = 5) {
   return Object.entries(terpenes || {}).sort((a, b) => b[1] - a[1]).slice(0, n).map(([name, val]) => ({ name: formatTerpName(name), value: val }));
 }
 function formatTerpName(key) {
-  const map = { limonene:"Limonene", caryophyllene:"β-Caryophyllene", myrcene:"Myrcene", linalool:"Linalool", pinene:"α-Pinene", alphaPinene:"α-Pinene", betaPinene:"β-Pinene", farnesene:"Farnesene", terpinolene:"Terpinolene", bisabolol:"α-Bisabolol", humulene:"Humulene", ocimene:"Ocimene", terpineol:"Terpineol", guaiol:"Guaiol", nerolidol:"Nerolidol", fenchol:"Fenchol", camphene:"Camphene", borneol:"Borneol", phytol:"Phytol", cedrene:"Cedrene", caryophylleneOxide:"Caryophyllene Oxide", fenchone:"Fenchone", geraniol:"Geraniol", betaCitronellol:"β-Citronellol", cymene:"Cymene", delta3Carene:"Δ3-Carene", eucalyptol:"Eucalyptol", isopulegol:"Isopulegol", gammaTerpinene:"γ-Terpinene", alphaTerpinene:"α-Terpinene", terpinen4ol:"Terpinen-4-ol", geranylAcetate:"Geranyl Acetate", phellandrene:"Phellandrene", terpinene:"Terpinene" };
+  const map = {
+    limonene:"Limonene", caryophyllene:"β-Caryophyllene", transCaryophyllene:"β-Caryophyllene", myrcene:"Myrcene", linalool:"Linalool",
+    pinene:"α-Pinene", alphaPinene:"α-Pinene", betaPinene:"β-Pinene", farnesene:"Farnesene", terpinolene:"Terpinolene",
+    bisabolol:"α-Bisabolol", alphaBisabolol:"α-Bisabolol", humulene:"Humulene", ocimene:"Ocimene", terpineol:"Terpineol",
+    guaiol:"Guaiol", nerolidol:"Nerolidol", transNerolidol:"trans-Nerolidol", cisNerolidol:"cis-Nerolidol",
+    fenchol:"Fenchol", camphene:"Camphene", borneol:"Borneol", phytol:"Phytol", cedrene:"Cedrene",
+    caryophylleneOxide:"Caryophyllene Oxide", fenchone:"Fenchone", geraniol:"Geraniol",
+    betaCitronellol:"β-Citronellol", cymene:"Cymene", delta3Carene:"Δ3-Carene", eucalyptol:"Eucalyptol",
+    isopulegol:"Isopulegol", gammaTerpinene:"γ-Terpinene", alphaTerpinene:"α-Terpinene",
+    terpinen4ol:"Terpinen-4-ol", geranylAcetate:"Geranyl Acetate", phellandrene:"Phellandrene",
+    terpinene:"Terpinene", selinaDiene3711:"Selina-3,7(11)-diene", selinaDiene41511:"Selina-4(15),7(11)-diene",
+    germacreneB:"Germacrene B", transBergamotene:"trans-Bergamotene", eBetaOcimene:"E-β-Ocimene",
+    gammaEudesmol:"γ-Eudesmol", gammaElemene:"γ-Elemene", gammaSelinene:"γ-Selinene",
+    alphaSelinene:"α-Selinene", betaSelinene:"β-Selinene", sabinene:"Sabinene", fenchyl:"Fenchyl Alcohol",
+    gammaTerpinene:"γ-Terpinene", alphaPhellandrene:"α-Phellandrene", valencene:"Valencene",
+    bulnesol:"Bulnesol", borneol:"Borneol", hexylHexanoate:"Hexyl Hexanoate", betaEudesmol:"β-Eudesmol",
+    camphor:"Camphor", zBetaOcimene:"Z-β-Ocimene", transCaryophyllene:"β-Caryophyllene",
+    alphaBisabolol:"α-Bisabolol", cisNerolidol:"cis-Nerolidol", gammaEudesmol:"γ-Eudesmol",
+  };
   return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
 }
 function terpColor(name) {
@@ -269,9 +299,7 @@ export default function PrescriberDesktop() {
     setShowCount(8);
   }, []);
 
-  function selectOption(key, val) {
-    setPendingAnswer({ key, val });
-  }
+  function selectOption(key, val) { setPendingAnswer({ key, val }); }
 
   function confirmStep() {
     if (!pendingAnswer) return;
@@ -293,9 +321,25 @@ export default function PrescriberDesktop() {
 
   // Library
   const libStrains = strainDB
-    .filter(s => { if (libFilter === "all") return true; if (libFilter === "functional") return s.category === "Day / Functional"; if (libFilter === "creative") return s.category === "Deep Think / Creative"; if (libFilter === "sleep") return s.category === "Sleep / KO"; if (libFilter === "cbd") return s.category === "CBD Dominant" || s.category === "CBD Balanced"; if (libFilter === "lowexp") return s.category === "Low Expression"; if (libFilter === "tried") return s.status === "tried"; return true; })
+    .filter(s => {
+      if (libFilter === "all") return true;
+      if (libFilter === "functional") return s.category === "Day / Functional";
+      if (libFilter === "creative") return s.category === "Deep Think / Creative";
+      if (libFilter === "sleep") return s.category === "Sleep / KO";
+      if (libFilter === "cbd") return s.category === "CBD Dominant" || s.category === "CBD Balanced";
+      if (libFilter === "lowexp") return s.category === "Low Expression";
+      if (libFilter === "tried") return s.status === "tried";
+      if (libFilter === "cbg") return s.cbg > 0;
+      return true;
+    })
     .filter(s => !libSearch || s.name.toLowerCase().includes(libSearch.toLowerCase()) || (s.brand && s.brand.toLowerCase().includes(libSearch.toLowerCase())) || (s.cultivar && s.cultivar.toLowerCase().includes(libSearch.toLowerCase())))
-    .sort((a, b) => { if (libSort === "name") return a.name.localeCompare(b.name); if (libSort === "thc") return b.thc - a.thc; if (libSort === "terpenes") return (b.totalTerpenes || 0) - (a.totalTerpenes || 0); if (libSort === "price") return (a.price || 999) - (b.price || 999); return 0; });
+    .sort((a, b) => {
+      if (libSort === "name") return a.name.localeCompare(b.name);
+      if (libSort === "thc") return b.thc - a.thc;
+      if (libSort === "terpenes") return (b.totalTerpenes || 0) - (a.totalTerpenes || 0);
+      if (libSort === "price") return (a.price || 999) - (b.price || 999);
+      return 0;
+    });
 
   const currentPending = pendingAnswer?.key === steps[step]?.key ? pendingAnswer.val : null;
 
@@ -319,6 +363,8 @@ export default function PrescriberDesktop() {
           --accent-dim: rgba(196,163,90,0.15);
           --green: #4CAF7D;
           --red: #C45A5A;
+          --cbg: #7EC8A4;
+          --cbg-dim: rgba(126,200,164,0.15);
           --font-main: 'DM Sans', -apple-system, sans-serif;
           --font-mono: 'JetBrains Mono', monospace;
         }
@@ -343,7 +389,6 @@ export default function PrescriberDesktop() {
         .topbar-meta { font-size: 12px; color: var(--text-tertiary); font-family: var(--font-mono); }
         .content { padding: 40px; max-width: 1400px; }
 
-        /* ── STEP PROGRESS CIRCLES ── */
         .step-progress { display: flex; align-items: center; margin-bottom: 40px; }
         .step-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: var(--font-mono); border: 2px solid var(--border); color: var(--text-tertiary); background: transparent; flex-shrink: 0; transition: all 0.2s; }
         .step-circle.done { background: var(--accent); border-color: var(--accent); color: #0C0F14; }
@@ -351,7 +396,6 @@ export default function PrescriberDesktop() {
         .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; transition: background 0.3s; }
         .step-line.done { background: var(--accent); }
 
-        /* ── ENGINE STEPS ── */
         .step-header { margin-bottom: 32px; }
         .step-header h3 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
         .step-header p { font-size: 14px; color: var(--text-secondary); }
@@ -366,18 +410,15 @@ export default function PrescriberDesktop() {
 
         .step-actions { display: flex; gap: 12px; margin-top: 28px; }
 
-        /* ── BUTTONS ── */
         .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #0C0F14; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: var(--font-main); transition: all 0.15s; }
         .btn-primary:hover { filter: brightness(1.1); }
         .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; filter: none; }
         .btn-secondary { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-family: var(--font-main); transition: all 0.15s; }
         .btn-secondary:hover { border-color: var(--accent); color: var(--text-primary); }
 
-        /* ── PATIENT PROFILE SUMMARY ── */
         .profile-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
         .profile-chip { font-size: 12px; font-family: var(--font-mono); color: var(--accent); background: var(--accent-dim); padding: 5px 12px; border-radius: 5px; }
 
-        /* ── RESULTS ── */
         .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
         .results-header h3 { font-size: 22px; font-weight: 700; }
 
@@ -397,6 +438,7 @@ export default function PrescriberDesktop() {
 
         .card-meta { padding: 0 24px 16px; display: flex; gap: 10px; flex-wrap: wrap; }
         .meta-pill { font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); background: var(--bg-tertiary); padding: 4px 10px; border-radius: 4px; }
+        .meta-pill.cbg { color: var(--cbg); background: var(--cbg-dim); }
 
         .card-terpbar { padding: 0 24px 16px; }
         .terpbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -425,7 +467,6 @@ export default function PrescriberDesktop() {
 
         .show-more-wrap { text-align: center; margin-top: 24px; }
 
-        /* ── LIBRARY ── */
         .lib-controls { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
         .lib-search { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 10px 16px; border-radius: 8px; font-size: 14px; font-family: var(--font-main); width: 300px; outline: none; transition: border-color 0.15s; }
         .lib-search:focus { border-color: var(--accent); }
@@ -451,7 +492,6 @@ export default function PrescriberDesktop() {
         .lib-exp-section h5 { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
         .lib-exp-section p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
 
-        /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
           .sidebar { width: 72px; }
           .sidebar-brand h1, .sidebar-brand p, .nav-label, .sidebar-footer { display: none; }
@@ -475,8 +515,8 @@ export default function PrescriberDesktop() {
       <div className="shell">
         <aside className="sidebar">
           <div className="sidebar-brand">
-            <h1>Terpene Intel</h1>
-            <p>Prescriber Decision Support</p>
+            <h1>Prescriber Intelligence</h1>
+            <p>Clinical Decision Support</p>
           </div>
           <nav className="sidebar-nav">
             <div className={`nav-item ${view === "engine" ? "active" : ""}`} onClick={() => setView("engine")}>
@@ -491,6 +531,7 @@ export default function PrescriberDesktop() {
           <div className="sidebar-footer">
             <p>{strainDB.length} products indexed</p>
             <p style={{marginTop:4}}>{strainDB.filter(s=>s.status==="tried").length} clinically verified</p>
+            <p style={{marginTop:4}}>{strainDB.filter(s=>s.cbg>0).length} with CBG data</p>
           </div>
         </aside>
 
@@ -576,6 +617,7 @@ export default function PrescriberDesktop() {
                         <div className="card-meta">
                           <span className="meta-pill">THC {strain.thc}%</span>
                           {strain.cbd > 0 && <span className="meta-pill">CBD {strain.cbd}%</span>}
+                          {strain.cbg > 0 && <span className="meta-pill cbg">CBG {strain.cbg}%</span>}
                           <span className="meta-pill">{strain.totalTerpenes?.toFixed(1)}% terps</span>
                           <span className="meta-pill">{strain.species}</span>
                           {strain.price && <span className="meta-pill">${strain.price.toFixed(2)}/g</span>}
@@ -664,6 +706,7 @@ export default function PrescriberDesktop() {
                     <option value="cbd">CBD Products</option>
                     <option value="lowexp">Low Expression</option>
                     <option value="tried">Clinically Verified</option>
+                    <option value="cbg">Has CBG Data</option>
                   </select>
                   <select className="lib-select" value={libSort} onChange={e => setLibSort(e.target.value)}>
                     <option value="name">Sort: Name</option>
@@ -679,6 +722,7 @@ export default function PrescriberDesktop() {
                       <th>Product</th>
                       <th>THC</th>
                       <th>CBD</th>
+                      <th>CBG</th>
                       <th>Total Terps</th>
                       <th>Top Terpenes</th>
                       <th>Category</th>
@@ -700,6 +744,7 @@ export default function PrescriberDesktop() {
                             </td>
                             <td className="mono">{s.thc}%</td>
                             <td className="mono">{s.cbd > 0 ? `${s.cbd}%` : "—"}</td>
+                            <td className="mono" style={{color: s.cbg > 0 ? "var(--cbg)" : "var(--text-tertiary)"}}>{s.cbg > 0 ? `${s.cbg}%` : "—"}</td>
                             <td className="mono">{s.totalTerpenes ? `${s.totalTerpenes.toFixed(2)}%` : "—"}</td>
                             <td>
                               <div className="lib-terp-pills">
@@ -714,7 +759,7 @@ export default function PrescriberDesktop() {
                           </tr>
                           {isExpanded && (
                             <tr className="lib-expanded-row">
-                              <td colSpan={8}>
+                              <td colSpan={9}>
                                 <div className="lib-expanded-inner">
                                   <div>
                                     <div className="lib-exp-section">
@@ -738,6 +783,7 @@ export default function PrescriberDesktop() {
                                     <div className="lib-exp-section" style={{marginTop:16}}>
                                       <h5>Details</h5>
                                       <p><strong>Species:</strong> {s.species}</p>
+                                      {s.cbg > 0 && <p><strong>CBG:</strong> <span style={{color:"var(--cbg)"}}>{s.cbg}%</span></p>}
                                       {s.sizes?.length > 0 && <p><strong>Sizes:</strong> {s.sizes.join(", ")}</p>}
                                       {s.price && <p><strong>Price:</strong> ${s.price.toFixed(2)}/g (RRP ${s.rrp})</p>}
                                     </div>
